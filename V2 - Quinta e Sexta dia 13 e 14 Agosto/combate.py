@@ -1,0 +1,2 @@
+def combatesys():
+    print("Izuki")

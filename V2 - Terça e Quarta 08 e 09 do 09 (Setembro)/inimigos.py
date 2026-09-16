@@ -1,0 +1,273 @@
+import random
+texto_lobo = True
+
+class Monstro:
+
+    def __init__(self, nome, vida, ataque, ouro, xp):
+
+        self.nome = nome
+        self.vida = vida
+        self.vidamax = vida
+        self.ataque = ataque
+        self.ouro = ouro
+        self.xp = xp
+
+    def mostrar_status(self):
+        print(f"============ INIMIGO ============")
+        print(f"Nome: {self.nome}")
+        print(f"Vida: {self.vida}/{self.vidamax}")
+        print(f"Ataque: {self.ataque}")
+
+    def atacar(self, heroi):            # Foco do heroi dento do ataque do inimigo para poder garantir que seja gerado caso atacar 2 vezes
+            ataquefinal = max(1, self.ataque - heroi.defesa)
+            heroi.vida -= ataquefinal
+            print(f"\nO {self.nome} te ataca causando {ataquefinal} de dano")
+            heroi.foco = min(100, heroi.foco + (random.randint(10, 14) + heroi.focogen * 1.02))
+            input("\nPressione ENTER para continuar...")
+        
+class Inimigo(Monstro):
+    def __init__(self, nome, vida, ataque, ouro, xp) : 
+        super().__init__(nome, vida, ataque, ouro, xp) # Herdou os parametros de monstro
+        self.defesa = 0
+        self.defesa_magica = 0
+        self.habilidade = None
+
+    def usar_habilidade(self, heroi):
+        pass
+
+class Boss(Monstro):        # EXCLUSIVO DOS BOSSES POR HORA , defesa magica e defesa(ataque)
+    def __init__(self, nome, vida, ataque, ouro, xp, habilidade, defesa, defesa_magica) : 
+        super().__init__(nome, vida, ataque, ouro, xp) # Herdou os parametros de personagem
+        self.habilidade = habilidade
+        self.defesa = defesa
+        self.defesa_magica = defesa_magica
+        self.habilidade_usada = False
+
+    def mostrar_status(self):
+        print("============ INIMIGO ============")
+        print(f"Nome: {self.nome}")
+        print(f"Vida: {self.vida}/{self.vidamax}")
+        print(f"Ataque: {self.ataque}")
+
+    def atacar(self, heroi):
+            ataquefinal = max(1, self.ataque - heroi.defesa)            # Foco do heroi dento do ataque do inimigo para poder garantir que seja gerado caso atacar 2 vezes
+            heroi.vida -= ataquefinal
+            print(f"\nO {self.nome} te ataca causando {ataquefinal} de dano")
+            heroi.foco = min(100, heroi.foco + (random.randint(10, 14) + heroi.focogen * 1.02))
+            input("\nPressione ENTER para continuar...")
+    
+    def usar_habilidade(self, heroi):
+        if self.habilidade_usada == False:
+            self.habilidade(heroi,self)
+
+def slime_absorção(heroi, boss):
+    if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.50:
+        cura = random.randint(99, 110)
+        boss.vida = min(boss.vidamax, boss.vida + cura)
+        print("O Rei Slime absorver a massa que de outros slimes ao redor e se cura!")
+        print(f"Rei Slime recuperou {cura}")
+        input("\nPressione ENTER para continuar...")
+        boss.habilidade_usada = True
+
+def frenesi_lobo(heroi, boss):
+    global texto_lobo
+    if texto_lobo == True:
+        texto_lobo = False
+        print(f"O {boss.nome} entrou em frenesi, e vai atacar 2 vezes por turno agora!")
+        input("\nPressione ENTER para continuar...")
+    if boss.vida <= boss.vidamax * 0.50:
+        print(f"O {boss.nome} te atacou mais uma vez")
+        boss.atacar(heroi)
+
+def golem_defesa(heroi, boss):
+    if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.40:
+        print("O Golem se tornou ivulnerável a magias")
+        boss.defesa_magica += 500
+        input("\nPressione ENTER para continuar...")
+        boss.habilidade_usada = True
+     
+def furia_dragão(heroi, boss):
+    if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.40:
+        print("O Dragão de gelo entrou em Fúria!")
+        boss.ataque = int(boss.ataque * 1.50)
+        print(f"Ataque aumentou para {boss.ataque}")
+        boss.habilidade_usada = True
+        input("\nPressione ENTER para continuar...")
+        
+# ==========================================
+# BIOMA 1: FLORESTA (Dificuldade Elevada)
+# ==========================================
+inimigos_floresta = [
+    # Nome | Vida | Ataque | Ouro | XP
+    Inimigo(
+        "Goblin",
+        random.randint(65, 85),
+        random.randint(14, 20),
+        random.randint(8, 14),
+        random.randint(15, 20),
+    ),
+    Inimigo(
+        "Slime",
+        random.randint(90, 115),
+        random.randint(10, 15),
+        random.randint(6, 12),
+        random.randint(12, 16),
+    ),
+    Inimigo(
+        "Aranha Gigante",
+        random.randint(75, 95),
+        random.randint(16, 22),
+        random.randint(10, 16),
+        random.randint(18, 22),
+    ),
+    Inimigo(
+        "Urso Ancião",
+        random.randint(130, 160),
+        random.randint(22, 28),
+        random.randint(15, 22),
+        random.randint(25, 30),
+    ),
+    Inimigo(
+        "Lobo Selvagem",
+        random.randint(70, 88),
+        random.randint(18, 24),
+        random.randint(8, 14),
+        random.randint(15, 20),
+    ),
+]
+
+boss_floresta = [
+    # Nome | Vida | Ataque | Ouro | XP | Habilidade | Def.Mágica | Defesa Física
+    Boss(
+        "Rei Slime",
+        random.randint(220, 240),
+        random.randint(25, 32),
+        random.randint(40, 60),
+        random.randint(80, 100),
+        slime_absorção,
+        defesa_magica=0,
+        defesa=0,
+    ),
+    Boss(
+        "Lobo Superior",
+        random.randint(300, 330),
+        random.randint(32, 40),
+        random.randint(50, 75),
+        random.randint(110, 130),
+        frenesi_lobo,
+        defesa_magica=0,
+        defesa=0,
+    ),
+]
+
+# ==========================================
+# BIOMA 2: CAVERNA (Dificuldade Brutal)
+# ==========================================
+inimigos_caverna = [
+    Inimigo(
+        "Rato das Profundezas",
+        random.randint(140, 175),
+        random.randint(25, 32),
+        random.randint(15, 22),
+        random.randint(30, 40),
+    ),
+    Inimigo(
+        "Besouro Blindado",
+        random.randint(220, 270),
+        random.randint(20, 26),
+        random.randint(20, 30),
+        random.randint(35, 45),
+    ),
+    Inimigo(
+        "Slime de Pedra",
+        random.randint(180, 220),
+        random.randint(22, 28),
+        random.randint(18, 26),
+        random.randint(32, 42),
+    ),
+    Inimigo(
+        "Orc",
+        random.randint(250, 310),
+        random.randint(32, 40),
+        random.randint(25, 35),
+        random.randint(45, 55),
+    ),
+    Inimigo(
+        "Escorpião Gigante",
+        random.randint(160, 200),
+        random.randint(35, 44),
+        random.randint(22, 30),
+        random.randint(40, 50),
+    ),
+]
+
+boss_caverna = [
+    Boss(
+        "Golem Ancestral",
+        random.randint(390, 440),
+        random.randint(48, 58),
+        random.randint(120, 160),
+        random.randint(200, 250),
+        golem_defesa,
+        defesa_magica=0,
+        defesa=0,
+    )
+]
+
+# ==========================================
+# BIOMA 3: MONTANHAS GELADAS (Extremo)
+# ==========================================
+inimigos_montanhasgeladas = [
+    Inimigo(
+        "Espírito do Gelo",
+        random.randint(280, 340),
+        random.randint(48, 58),
+        random.randint(30, 42),
+        random.randint(60, 75),
+    ),
+    Inimigo(
+        "Águia Gigante",
+        random.randint(250, 310),
+        random.randint(52, 64),
+        random.randint(28, 40),
+        random.randint(55, 70),
+    ),
+    Inimigo(
+        "Slime de Gelo",
+        random.randint(320, 390),
+        random.randint(42, 52),
+        random.randint(32, 45),
+        random.randint(65, 80),
+    ),
+    Inimigo(
+        "Líder Orc",
+        random.randint(420, 520),
+        random.randint(58, 70),
+        random.randint(40, 58),
+        random.randint(80, 100),
+    ),
+    Inimigo(
+        "Líder Goblin",
+        random.randint(300, 370),
+        random.randint(55, 66),
+        random.randint(45, 60),
+        random.randint(75, 90),
+    ),
+]
+
+boss_montanhasgeladas = [
+    Boss(
+        "Dragão de Gelo",
+        random.randint(2200, 2600),
+        random.randint(75, 92),
+        random.randint(280, 380),
+        random.randint(450, 550),
+        furia_dragão,
+        defesa_magica=40,
+        defesa=55,
+    )
+]
+
+Bandido = [
+    Inimigo("Bandido", random.randint(29,36), random.randint(25, 29), random.randint(16, 24), random.randint(17,21))
+]
