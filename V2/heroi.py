@@ -146,7 +146,7 @@ class Personagem:
 
 class Heroi(Personagem):
     def __init__(self, nome):   #  nome, vida 180, ataque 13, defesa 7, mana 30, ouro 30, nivel 1, xp 0, xplevel 40 , foco 0):
-        super().__init__(nome, 170, 13, 7, 30, 40, 1, 0, 40, 0) # Herdou os parametros de personagem / Aqui já configuro os status inicias também
+        super().__init__(nome, 170, 13, 7, 30, 30, 1, 0, 40, 0) # Herdou os parametros de personagem / Aqui já configuro os status inicias também
         from vilas import vila_inicial
         self.vila_atual = vila_inicial
         import mundo  

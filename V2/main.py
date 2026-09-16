@@ -1,10 +1,11 @@
 from telas import menujogo
 from heroi import Heroi
-from database import menu_principal
+from database import menu_principal, criar_banco
 from util import limpar_tela, Cores
 
+criar_banco()               # <- chama AQUI, antes de tudo
 limpar_tela()
-heroi = menu_principal()    # Tela de Carregamento do jogo antes do jogo iniciar.
+heroi = menu_principal()
 if heroi is None:
     limpar_tela()
 
@@ -111,7 +112,12 @@ def main():
 
 # Ponto de entrada
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        input("\nPressione Enter para sair...")
 
 
 # Posteriormente fazer um seletor de DIFICULDADE no V2.5 

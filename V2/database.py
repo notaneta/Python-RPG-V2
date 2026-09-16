@@ -3,10 +3,12 @@ import sqlite3, copy
 from heroi import Heroi
 import progresso
 import vilas
+from caminhos import CAMINHO_BANCO
+
 
 # Tabela do herói   /   Caso adicionar mais coisas tenho que apagar o banco de dados anterior 
 def criar_banco():
-    conexao = sqlite3.connect("rpg.db")
+    conexao = sqlite3.connect(CAMINHO_BANCO)
     cursor = conexao.cursor()
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS heroi (
@@ -94,7 +96,7 @@ if __name__ == "__main__":      # O if __name__ == "__main__": faz o código rod
 
 
 def salvar_heroi(heroi):
-    conexao = sqlite3.connect("rpg.db")
+    conexao = sqlite3.connect(CAMINHO_BANCO)
     cursor = conexao.cursor()
 
     # --- 1) Salva os atributos do herói (INSERT ou UPDATE) ---
@@ -223,7 +225,7 @@ def salvar_heroi(heroi):
     conexao.close()
 
 def carregar_heroi():
-    conexao = sqlite3.connect("rpg.db")
+    conexao = sqlite3.connect(CAMINHO_BANCO)
     cursor = conexao.cursor()
     cursor.execute("""
     SELECT nome, nivel, vida, vidamax, mana, manamax,
@@ -354,7 +356,7 @@ def carregar_heroi():
     return heroi
 
 def deletar_save():
-    with sqlite3.connect("rpg.db") as conexao:
+    with sqlite3.connect(CAMINHO_BANCO) as conexao:
         cursor = conexao.cursor()
         cursor.execute("DELETE FROM inventario WHERE heroi_id = ?", (1,))
         cursor.execute("DELETE FROM magias_heroi WHERE heroi_id = ?", (1,))
@@ -372,7 +374,7 @@ def menu_deletar():
     input("Pressione ENTER para continuar...")
 
 def menu_principal():
-    conexao = sqlite3.connect("rpg.db")
+    conexao = sqlite3.connect(CAMINHO_BANCO)
     cursor = conexao.cursor()
     cursor.execute("SELECT id FROM heroi WHERE id = ?", (1,))
     save = cursor.fetchone()
