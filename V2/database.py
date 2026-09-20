@@ -212,8 +212,10 @@ def salvar_heroi(heroi):
     todos_amuletos = (
         vilas.ferreiro_Amuletos_Ataque
         + vilas.ferreiro_Amuletos_Defesa
+        + vilas.mago_amuletos_mana
         + [a for lista in vilas.amuletos_ataque_exclusivos.values() for a in lista]
         + [a for lista in vilas.amuletos_defesa_exclusivos.values() for a in lista]
+        + [a for lista in vilas.amuletos_mana_exclusivos.values() for a in lista]
     )
     for item in todos_amuletos:
         cursor.execute("""
@@ -345,12 +347,16 @@ def carregar_heroi():
 
     vilas.ferreiro_Amuletos_Ataque[:] = [i for i in vilas.ferreiro_Amuletos_Ataque if i.nome in nomes_salvos]
     vilas.ferreiro_Amuletos_Defesa[:] = [i for i in vilas.ferreiro_Amuletos_Defesa if i.nome in nomes_salvos]
+    vilas.mago_amuletos_mana[:] = [i for i in vilas.mago_amuletos_mana if i.nome in nomes_salvos]
 
     for chave, lista in vilas.amuletos_ataque_exclusivos.items():
         vilas.amuletos_ataque_exclusivos[chave] = [i for i in lista if i.nome in nomes_salvos]
 
     for chave, lista in vilas.amuletos_defesa_exclusivos.items():
         vilas.amuletos_defesa_exclusivos[chave] = [i for i in lista if i.nome in nomes_salvos]
+
+    for chave, lista in vilas.amuletos_mana_exclusivos.items():
+        vilas.amuletos_mana_exclusivos[chave] = [i for i in lista if i.nome in nomes_salvos]
 
     conexao.close()
     return heroi

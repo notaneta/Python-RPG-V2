@@ -39,9 +39,9 @@ class Personagem:
         from magias import listamagias
         while self.xp >= self.xplevel:
             self.vidamax = int(self.vidamax * 1.06)
-            self.vida = self.vidamax * 0.50      # Recupera vida 50% ao subir de level
+            self.vida = min(self.vidamax, self.vida + self.vidamax * 0.50)      # Recupera vida 40% ao subir de level
             self.manamax = int(self.manamax * 1.10)
-            self.mana = self.manamax * 0.50      # Recupera mana 50% ao subir de level
+            self.mana += min(self.manamax, self.mana + self.manamax * 0.50)      # Recupera mana 40% ao subir de level
             self.ataque = int(self.ataque * 1.07)
             self.defesa += 1
             self.xp -= self.xplevel
@@ -50,7 +50,7 @@ class Personagem:
 
             limpar_tela()
             print(f"\nParabéns você subiu para o nivel {self.nivel}!")
-            print(f"Você teve seu HP e MP restaurado em 50%")
+            print(f"Você teve seu HP e MP restaurado em 40%")
             input("\nPressione ENTER para continuar...")
             for skill in listahabilidades:
                 if skill.requisito <= self.nivel and skill not in self.habilidadesaprendidas:   # Para cada SKILL que o requisito estiver acima ou igual o nivel do heroi, adicionar ela para o heroi

@@ -3,6 +3,7 @@ from lore import dialogo
 texto_lobo = True
 veneno = False
 acabou_de_ativar = False
+frase_golem = False
 frase_sombra = False
 frase_sombra2 = False
 
@@ -42,10 +43,10 @@ class Inimigo(Monstro):
         pass
 
 class Boss(Monstro):        # EXCLUSIVO DOS BOSSES POR HORA , defesa magica e defesa(ataque)
-    def __init__(self, nome, vida, ataque, ouro, xp, habilidade) : 
-        super().__init__(nome, vida, ataque, ouro, xp) # Herdou os parametros de personagem
+    def __init__(self, nome, vida, ataque, ouro, xp, habilidade, defesa) : 
+        super().__init__(nome, vida, ataque, ouro, xp) 
         self.habilidade = habilidade
-        self.defesa = 0
+        self.defesa = defesa
         self.defesa_magica = 0
         self.habilidade_usada = False
         self.skill_stun = False
@@ -72,7 +73,7 @@ def slime_absorção(heroi, boss):
         cura = random.randint(99, 110)
         boss.vida = min(boss.vidamax, boss.vida + cura)
         print("O Rei Slime absorveu a massa de outros slimes ao redor de si!")
-        print(f"Rei Slime recuperou {cura}")
+        print(f"Rei Slime recuperou {cura} de HP!")
         input("\nPressione ENTER para continuar...")
         boss.habilidade_usada = True
 
@@ -86,12 +87,22 @@ def frenesi_lobo(heroi, boss):
         print(f"\n{boss.nome} está em frenesi")
         boss.atacar(heroi)
 
-def golem_defesa(heroi, boss):
+def golem_defesa_magica(heroi, boss):
     if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.40:
         print("O Golem se tornou ivulnerável a magias")
+        print("Mas sua defesa física caiu o tornando vulnerável!")
+        boss.defesa = 0
         boss.defesa_magica += 500
         input("\nPressione ENTER para continuar...")
         boss.habilidade_usada = True
+
+def golem_defesa(heroi, boss):
+    global frase_golem
+    if not frase_golem:
+        print(f"O {boss.nome} parece ser muito resistente a golpes físicos!")
+        print("Você terá que pensar em algum modo de causar dano!")
+        frase_golem = True
+        input("\nPressione ENTER para continuar...")
      
 def furia_dragão(heroi, boss):
     if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.40: # Vida abaixo de 40%
@@ -161,14 +172,13 @@ def tempestade_Glacial(heroi, boss):
 def eco_dos_mortos(heroi, boss):    # Termnar habilidade boss
     global acabou_de_ativar
     if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.50:
-        dialogo("\nRei do Caos: Interessante...\nHá séculos ninguém era capaz de me ferir.")
+        dialogo(f"\n{boss.nome}: Interessante...\nHá séculos ninguém era capaz de me ferir.")
         input("\nPressione ENTER para continuar...\n")
-        dialogo("Rei do Caos: Mas isso não muda nada! O mundo continuará apodrecendo!\n")
+        dialogo(f"\n{boss.nome}: Mas isso não muda nada! O mundo continuará apodrecendo!\n")
         print("Os espíritos invocados irão te atacar de 3 em 3 turnos causando dano adicional de 10% do dano recebido e paralisado por 1 turno.")
         input("\nPressione ENTER para continuar...\n")
         heroi.contador_gelo = 4
         boss.habilidade_usada = True
-
 
     if heroi.contador_gelo == 0:
         print("\nOs espiritos invocados atacam!")
@@ -185,13 +195,24 @@ def eco_dos_mortos(heroi, boss):    # Termnar habilidade boss
 
     acabou_de_ativar = False
 
+def lamento_final(heroi, boss): 
+    if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.30:
+        print(f"\n{boss.nome}: Você não é nada")
+        print(f"{boss.nome} usou Lamento Final .")
+        cura = boss.vidamax * 0.40
+        boss.vida = cura
+        print(f"\n{boss.nome} teve a vida recuperada em {cura}")
+        boss.ataque += 30
+        print(f"\n{boss.nome} teve o ataque aumentado em 30")
+        input("\nPressione ENTER para continuar...\n")
+
 def ultima_resistencia(heroi, boss): 
     if boss.habilidade_usada == False and boss.vida <= boss.vidamax * 0.30:
-        print("\nRei do Caos: Não!\nEu me recuso a desaparecer!\nSe o mundo deseja o caos...\nEntão eu me tornarei o próprio caos!")
-        print("Rei do Caos usou ULTIMA RESISTENCIA.")
+        print(f"\n{boss.nome}: Não!\nEu me recuso a desaparecer!\nSe o mundo deseja o caos...\nEntão eu me tornarei o próprio caos!")
+        print(f"{boss.nome} usou ULTIMA RESISTENCIA.")
         cura = boss.vidamax * 0.20
         boss.vida = cura
-        print(f"Rei do Caos teve a vida recuperada em {cura}")
+        print(f"\n{boss.nome} teve a vida recuperada em {cura}")
         input("\nPressione ENTER para continuar...\n")
     "Recebe uma cura de emergência de 20% do HP total e dobra seu ataque"
 
@@ -270,18 +291,20 @@ inimigos_floresta = [
 
 boss_floresta = [
     Boss("Rei Slime",
-         random.randint(320, 370),
-         random.randint(40, 48),
-         random.randint(220, 280),
-         random.randint(180, 230),
-         [slime_absorção]),
+         random.randint(370, 380),
+         random.randint(40, 50),
+         random.randint(70, 80),
+         random.randint(50, 60),
+         [slime_absorção],
+         defesa=0),
 
     Boss("Lobo Superior",
-         random.randint(400, 460),
+         random.randint(460, 470),
          random.randint(48, 56),
-         random.randint(300, 370),
-         random.randint(240, 310),
-         [frenesi_lobo]),
+         random.randint(70, 80),
+         random.randint(45, 55),
+         [frenesi_lobo],
+         defesa=0),
 ]
 
 
@@ -298,18 +321,20 @@ inimigos_caverna = [
 
 boss_caverna = [
     Boss("Golem Ancestral",
-         random.randint(900, 1050),
-         random.randint(72, 84),
-         random.randint(520, 650),
-         random.randint(450, 570),
-         [golem_defesa]),
+         random.randint(560, 570),
+         random.randint(72, 82),
+         random.randint(150, 160),
+         random.randint(110, 120),
+         [golem_defesa, golem_defesa_magica],
+         defesa=80),
 
     Boss("Aranha Rainha das Profundezas",
-         random.randint(850, 990),
-         random.randint(78, 92),
-         random.randint(540, 680),
-         random.randint(470, 600),
-         [casulo_sombrio, veneno_ancestral]),
+         random.randint(69, 700),
+         random.randint(92, 102),
+         random.randint(160, 170),
+         random.randint(120, 130),
+         [casulo_sombrio, veneno_ancestral],
+         defesa=0),
 ]
 
 
@@ -326,18 +351,20 @@ inimigos_montanhasgeladas = [
 
 boss_montanhasgeladas = [
     Boss("Dragão de Gelo",
-         random.randint(1750, 2000),
-         random.randint(130, 155),
-         random.randint(1100, 1350),
-         random.randint(950, 1200),
-         [furia_dragão]),
+         random.randint(800, 880),
+         random.randint(140, 150),
+         random.randint(290, 300),
+         random.randint(240, 250),
+         [furia_dragão],
+         defesa=0),
 
     Boss("Ymir, o Gigante de Gelo",
-         random.randint(1680, 1920),
-         random.randint(125, 148),
-         random.randint(1150, 1400),
-         random.randint(1000, 1250),
-         [tempestade_Glacial]),
+         random.randint(1220, 1230),
+         random.randint(158, 168),
+         random.randint(300, 310),
+         random.randint(250, 260),
+         [tempestade_Glacial],
+         defesa=0),
 ]
 
 
@@ -355,11 +382,12 @@ inimigos_castelo = [
 boss_castelo_do_caos = [
     Boss(
         "Rei do Caos",
-        random.randint(3000, 3500),
-        random.randint(200, 235),
-        random.randint(2400, 3000),
-        random.randint(2100, 2700),
-        [ultima_resistencia, eco_dos_mortos],
+        random.randint(1600, 1700),
+        random.randint(220, 240),
+        random.randint(550, 560),
+        random.randint(270, 280),
+        [ultima_resistencia],
+        defesa=0
     ),
     Boss(
         "???",                       # boss especial (raid)
@@ -368,6 +396,7 @@ boss_castelo_do_caos = [
         random.randint(1500, 1900),
         random.randint(1300, 1700),
         [execuçao_sombria, copia_magias],
+        defesa=0
     ),
 ]
 
@@ -378,11 +407,12 @@ boss_castelo_do_caos = [
 boss_abismo = [
     Boss(
         "Ultimo Rei",
-        random.randint(4000, 4700),
+        random.randint(3000, 3100),
         random.randint(260, 310),
         random.randint(4000, 5000),
         random.randint(3500, 4500),
-        [ultima_resistencia, eco_dos_mortos],
+        [lamento_final, eco_dos_mortos],
+        defesa=0
     ),
 ]
 
@@ -405,4 +435,5 @@ boss_yeti = Boss(
     random.randint(950, 1200),
     random.randint(850, 1100),
     [tempestade_Glacial],
+    defesa=0
 )

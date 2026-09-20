@@ -101,12 +101,13 @@ def copia_heroi_dialogo(heroi, boss):
 
     input("Pressione ENTER para continuar...\n")
 
-    dialogo(f"{boss.nome} Eu não fui criada para destruir você.")
+    dialogo(f"{boss.nome} Eu não fui criada para destruir a si mesmo.")
 
     input("Pressione ENTER para continuar...\n")
 
     dialogo(f"{boss.nome}: Fui criada para libertá-lo.")
 
+    input("Pressione ENTER para continuar...\n")
     input("Pressione ENTER para continuar...\n")
 
 
@@ -165,6 +166,7 @@ def copia_heroi_dialogo2(heroi, boss):
 
     print("A energia negra começa a deixar o corpo da sombra.")
     print("Ela se transforma em uma espécie de chave de energia.")
+    input("Pressione ENTER para continuar...\n")
     input("Pressione ENTER para continuar...\n")
 
 def dialogo_FINAL_verdadeiro(heroi, boss):
@@ -228,3 +230,4 @@ def dialogo_FINAL_verdadeiro(heroi, boss):
 
     print("Nova área desbloqueada!")
     print("Abismo\n")
+    input("Pressione ENTER para continuar...\n")

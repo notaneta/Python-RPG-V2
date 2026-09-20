@@ -1,5 +1,5 @@
 from util import limpar_tela
-from itens import poçoes, ferreiro_Amuletos_Ataque, ferreiro_Amuletos_Defesa, amuletos_ataque_exclusivos, amuletos_defesa_exclusivos
+from itens import poçoes, ferreiro_Amuletos_Ataque, ferreiro_Amuletos_Defesa, amuletos_ataque_exclusivos, amuletos_defesa_exclusivos, amuletos_mana_exclusivos, mago_amuletos_mana
 from magias import listamagias
 from magias import magias
 from eventos import evento_vila_inical, evento_festival_da_neve, evento_pesca_vila, evento_raid_vila_destruida, evento_sombra
@@ -29,7 +29,7 @@ class Vilas:
             print("  [2]  Ferreiro")
             print("  [3]  Estalagem          (restaura HP/MP)")
             print("  [4]  Status / Inventário")
-            print("  [5]  Evento da Vila")
+            print("  [5]  Evento da Vila     (Disponivel apenas antes da luta do Chefe)")
             print("  [0]  Sair da Vila")
             print("  " + "─" * 44)
             print()
@@ -47,25 +47,25 @@ class Vilas:
                     if escolha2 == "1":
                         heroi.mostrar_status()
                         input("\nPressione ENTER para continuar...")
-                        return
+                        break
 
                     elif escolha2 == "2":
                         heroi.mostrar_inventario_pocoes()
                         input("\nPressione ENTER para continuar...")
-                        return
+                        break
 
                     elif escolha2 == "3":
                         heroi.mostrarmagias()
                         input("\nPressione ENTER para continuar...")
-                        return
+                        break
 
                     elif escolha2 == "4":
                         heroi.mostrarSkill()
                         input("\nPressione ENTER para continuar...")
-                        return
+                        break
 
                     elif escolha2 == "0":
-                        return
+                        break
 
             elif escolha == "5":
                 heroi.vila_atual.eventos[0](heroi)
@@ -87,6 +87,10 @@ from itens import poçoes, usaritem
 from util import limpar_tela
 
 def menuloja(heroi):
+
+    nome_vila = heroi.vila_atual.nome
+    exclusivos_mana = amuletos_mana_exclusivos.setdefault(nome_vila, [])
+
     while True:
         limpar_tela()
 
@@ -95,6 +99,7 @@ def menuloja(heroi):
         print("LOJA DO MAGO".center(54))
         print("=" * 54)
         print("1 - Comprar Poções")
+        print("2 - Comprar amuletos")
         print("0 - Sair da loja")
 
         escolha = input("\nQual sua decisão? ")
@@ -104,82 +109,141 @@ def menuloja(heroi):
             input("Pressione ENTER para continuar...")
             return
 
-        if escolha != "1":
-            print("Comando não existente.")
-            input("Pressione ENTER para continuar...")
-            continue
-
+        if escolha == "1":
         # ---------- COMPRAR POÇÕES ----------
-        while True:
-            limpar_tela()
+            while True:
+                limpar_tela()
 
-            # Separa por categoria preservando a ordem original
-            vida      = [p for p in poçoes if p.tipo == "vida"]
-            mana      = [p for p in poçoes if p.tipo == "mana"]
-            especiais = [p for p in poçoes if p.tipo == "revive"]
+                # Separa por categoria preservando a ordem original
+                vida      = [p for p in poçoes if p.tipo == "vida"]
+                mana      = [p for p in poçoes if p.tipo == "mana"]
+                especiais = [p for p in poçoes if p.tipo == "revive"]
 
-            print(f"Heroi: {heroi.nome}  |  Ouro: {heroi.ouro}")
-            print("=" * 54)
-            print("LISTA DE POÇÕES".center(54))
-            print("=" * 54)
+                print(f"Heroi: {heroi.nome}  |  Ouro: {heroi.ouro}")
+                print("=" * 54)
+                print("LISTA DE POÇÕES".center(54))
+                print("=" * 54)
 
-            # --- Vida ---
-            print("-------------- POÇÕES DE VIDA --------------")
-            for i, p in enumerate(vida, start=1):
-                p.mostrar_item(i, heroi.ouro)
-            print()
+                # --- Vida ---
+                print("-------------- POÇÕES DE VIDA --------------")
+                for i, p in enumerate(vida, start=1):
+                    p.mostrar_item(i, heroi.ouro)
+                print()
 
-            # --- Mana ---
-            print("-------------- POÇÕES DE MANA --------------")
-            offset = len(vida)
-            for i, p in enumerate(mana, start=1):
-                p.mostrar_item(offset + i, heroi.ouro)
-            print()
-
-            # --- Especiais ---
-            if especiais:
-                print("------------- ITENS ESPECIAIS --------------")
-                offset += len(mana)
-                for i, p in enumerate(especiais, start=1):
+                # --- Mana ---
+                print("-------------- POÇÕES DE MANA --------------")
+                offset = len(vida)
+                for i, p in enumerate(mana, start=1):
                     p.mostrar_item(offset + i, heroi.ouro)
                 print()
 
-            print("=" * 54)
-            escolha2 = input("Digite o ID do item para comprar (0 = sair): ").strip()
+                # --- Especiais ---
+                if especiais:
+                    print("------------- ITENS ESPECIAIS --------------")
+                    offset += len(mana)
+                    for i, p in enumerate(especiais, start=1):
+                        p.mostrar_item(offset + i, heroi.ouro)
+                    print()
 
-            if escolha2 == "0":
-                print("Você saiu da seção de compras...")
+                print("=" * 54)
+                escolha2 = input("Digite o ID do item para comprar (0 = sair): ").strip()
+
+                if escolha2 == "0":
+                    print("Você saiu da seção de compras...")
+                    input("Pressione ENTER para continuar...")
+                    break
+
+                if not escolha2.isdigit():
+                    print("\nDigite apenas números.")
+                    input("Pressione ENTER para continuar...")
+                    continue
+
+                # Reconstrói a lista completa na mesma ordem da HUD
+                todos = vida + mana + especiais
+                indice = int(escolha2) - 1
+
+                if not (0 <= indice < len(todos)):
+                    print("\nItem não existente.")
+                    input("Pressione ENTER para continuar...")
+                    continue
+
+                item = todos[indice]
+
+                if heroi.ouro < item.custo:
+                    print(f"\nVocê não tem ouro suficiente. Precisa de {item.custo} e tem {heroi.ouro}.")
+                    input("Pressione ENTER para continuar...")
+                    continue
+
+                heroi.ouro -= item.custo
+                heroi.adicionar_pocoes(item)   # adicionar_pocoes já faz deepcopy
+
+                print(f"\nVocê comprou {item.nome} por {item.custo} de ouro.")
+                print(f"Seu novo ouro é {heroi.ouro}.")
                 input("Pressione ENTER para continuar...")
-                break
 
-            if not escolha2.isdigit():
-                print("\nDigite apenas números.")
+        if escolha == "2":
+            while True:
+                
+                lista_global = mago_amuletos_mana
+                lista_exclusiva = exclusivos_mana
+                categoria = "AMULETOS DE MANA"
+
+                lista = lista_global + lista_exclusiva   # só para exibição
+
+                print(f"Heroi: {heroi.nome}  |  Ouro: {heroi.ouro}")
+                print("=" * 54)
+                print(categoria.center(54))
+                print("=" * 54)
+
+                if not lista:
+                    print("\nNenhum amuleto disponível nesta vila.")
+                    input("Pressione ENTER para continuar...")
+                    return
+
+                mostrar_lista_amuletos(lista, heroi)
+
+                print("=" * 54)
+                escolha2 = input("Digite o ID do amuleto para comprar (0 = sair): ").strip()
+
+                if escolha2 == "0":
+                    print("Você saiu da loja...")
+                    input("Pressione ENTER para continuar...")
+                    break
+
+                if not escolha2.isdigit():
+                    print("\nDigite apenas números.")
+                    input("Pressione ENTER para continuar...")
+                    continue
+
+                indice = int(escolha2) - 1
+
+                if not (0 <= indice < len(lista)):
+                    print("\nItem não existente.")
+                    input("Pressione ENTER para continuar...")
+                    continue
+
+                amuleto = lista[indice]
+
+                if amuleto.custo > heroi.ouro:
+                    print(f"\nVocê não tem ouro suficiente. Precisa de {amuleto.custo} e tem {heroi.ouro}.")
+                    input("Pressione ENTER para continuar...")
+                    continue
+
+                amuleto.comprar(heroi)
+                amuleto.equipar(heroi)
+
+                if escolha == "1":
+                    print(f"\nVocê comprou {amuleto.nome}! Novo MP: {heroi.manamax}")
+
+                # Remove do lugar de origem de verdade, não da lista temporária
+                if amuleto in lista_global:
+                    lista_global.remove(amuleto)
+                elif amuleto in lista_exclusiva:
+                    lista_exclusiva.remove(amuleto)
+
                 input("Pressione ENTER para continuar...")
-                continue
 
-            # Reconstrói a lista completa na mesma ordem da HUD
-            todos = vida + mana + especiais
-            indice = int(escolha2) - 1
-
-            if not (0 <= indice < len(todos)):
-                print("\nItem não existente.")
-                input("Pressione ENTER para continuar...")
-                continue
-
-            item = todos[indice]
-
-            if heroi.ouro < item.custo:
-                print(f"\nVocê não tem ouro suficiente. Precisa de {item.custo} e tem {heroi.ouro}.")
-                input("Pressione ENTER para continuar...")
-                continue
-
-            heroi.ouro -= item.custo
-            heroi.adicionar_pocoes(item)   # adicionar_pocoes já faz deepcopy
-
-            print(f"\nVocê comprou {item.nome} por {item.custo} de ouro.")
-            print(f"Seu novo ouro é {heroi.ouro}.")
-            input("Pressione ENTER para continuar...")
-
+            
 def estalagem(heroi):
     while True:
         custo = int(12 + heroi.nivel * 1.05)
@@ -207,7 +271,6 @@ def mostrar_lista_amuletos(lista, heroi, offset=0):
     for i, amuleto in enumerate(lista, start=offset + 1):
         amuleto.mostrar_item(i, heroi.ouro)
     print()
-
 
 def ferreiro(heroi):
     while True:

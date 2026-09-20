@@ -21,97 +21,256 @@ def acampamento(heroi):
         eventoaleatorio = random.choice([evento_bau, evento_erva, evento_emboscada, evento_fada, evento_fogueira, evento_tempestade, evento_livro, evento_pedagio_forcado, evento_assalto_noturno])
         eventoaleatorio(heroi) 
 
-def evento_erva(heroi): # Evento dentro do acampamento
-    print("\n[EVENTO] Você encontra uma planta de aparência estranha perto do acampamento.")
-    escolha = input("Deseja comê-la?\n[1] - Sim\n[2] - Não\n")
-    
-    if escolha == "1":
-        efeito = random.choice(["cura", "veneno"])
-        if efeito == "cura":
-            heroi.vida = min(heroi.vidamax, heroi.vida + 20)
-            print("A erva tinha propriedades curativas! Você recuperou 20 de HP.")
-            input("Pressione ENTER para continuar...")
-        else:
-            heroi.vida -= 10
-            print("A erva era venenosa! Você perdeu 10 de HP.")
-            input("Pressione ENTER para continuar...")
+def evento_erva(heroi):
+    from util import limpar_tela
+    import random
+
+    limpar_tela()
+    print()
+    print("  [EVENTO] Uma planta de aparência estranha cresce perto do acampamento.")
+    print("           As folhas brilham levemente à luz da fogueira.")
+    print()
+
+    escolha = input("  Deseja comê-la?  [1] Sim  [2] Não  > ").strip()
+
+    if escolha == "2":
+        print("\n  Você decide não arriscar. A planta continua ali, indiferente.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    if escolha != "1":
+        print("\n  Comando inválido.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    # Efeito aleatório
+    efeito = random.choice(["cura", "veneno"])
+
+    if efeito == "cura":
+        # Cura escala com nível, com um pequeno bônus aleatório
+        cura = random.randint(15, 25) + int(heroi.nivel * 1.5)
+        vida_antes = heroi.vida
+        heroi.vida = min(heroi.vidamax, heroi.vida + cura)
+        curado_real = heroi.vida - vida_antes
+
+        print(f"\n  A erva tinha propriedades curativas!")
+        print(f"  Você recuperou {curado_real} de HP.")
+        if curado_real < cura:
+            print(f"  (Já estava com vida quase cheia — {cura - curado_real} de cura desperdiçados.)")
+
     else:
-        print("Você prefere não arriscar.")
+        # Veneno dói mais que a cura cura
+        dano = random.randint(20, 35) + int(heroi.nivel * 1.8)
+        heroi.vida = max(0, heroi.vida - dano)
 
-def evento_fada(heroi): # Evento dentro do acampamento
-    print("\n[EVENTO] Uma luz brilhante surge em volta... É uma fada?!")
-    print("Você tem a escolha de se aproximar...")
-    while True:
-        escolha = input("Oque fazer? \n[1] - Aproximar \n[2] - Não fazer nada")
-        if escolha == "1":
-            teste = random.randint(1,10)
-            if teste > 5:
-                print("A fada sorriu...")
-                input("Pressione ENTER para continuar...")
-                print("Ela canaliza uma energia mágica em você antes de desaparecer.")
-                heroi.manamax += 10
-                print("Seu MP aumentou permanentemente em +10!")
-                input("Pressione ENTER para continuar...")
-                return
-            elif teste < 5 and heroi.mana >= 10:
-                print("Não era uma fada...")
-                input("Pressione ENTER para continuar...")
-                print("Era uma armadilha de algum monstro inimigo, você teve que gastar energia para não ser pego")
-                heroi.mana -= 10
-                print("Perdeu -10 de MP...")
-                input("Pressione ENTER para continuar...")
-                return
+        print(f"\n  A erva era venenosa!")
+        print(f"  Você perdeu {dano} de HP.")
 
-            else:
-                print("Não era nada e você apenas foi embora...")
-                input("Pressione ENTER para continuar...")
+        # Alerta se o veneno for letal
+        if heroi.vida <= 0:
+            print(f"\n  O veneno foi forte demais...")
+            # Se quiser, deixe o jogo tratar a morte aqui. Ex:
+            # print("[GAME OVER]")
+            # sys.exit()
+        elif heroi.vida / heroi.vidamax < 0.25:
+            print(f"\n  ⚠ Vida crítica: {heroi.vida}/{heroi.vidamax}")
 
+    input("\n  Pressione ENTER para continuar...")
 
-        elif escolha == "2":
-            print("Você resolveu apenas ignorar e ir embora...")
-            input("Pressione ENTER para continuar...")
-            return
+def evento_fada(heroi):
+    from util import limpar_tela
 
+    limpar_tela()
+    print()
+    print("  [EVENTO] Uma luz brilhante surge em volta... É uma fada?!")
+    print("           Ela flutua, indiferente, à beira do acampamento.")
+    print()
+
+    escolha = input("  O que fazer?  [1] Aproximar  [2] Ignorar  > ").strip()
+
+    if escolha == "2":
+        print("\n  Você decide não se envolver. A luz desaparece sozinha.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    if escolha != "1":
+        print("\n  Comando inválido.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    # Rolagem de 1 a 10
+    # 1-4 → armadilha (40%)
+    # 5   → nada (10%)
+    # 6-10 → bênção (50%)
+    teste = random.randint(1, 10)
+
+    if teste >= 6:
+        # ---- BÊNÇÃO ----
+        bonus = 10 + int(heroi.nivel * 0.8)
+        heroi.manamax += bonus
+        heroi.mana = min(heroi.mana + bonus, heroi.manamax)
+
+        limpar_tela()
+        print()
+        print("  A fada sorri.")
+        input("  Pressione ENTER para continuar...")
+        print("\n  Ela canaliza uma energia mágica em você antes de desaparecer.")
+        print(f"  Seu MP máximo aumentou permanentemente em +{bonus}!")
+        input("\n  Pressione ENTER para continuar...")
+
+    elif teste >= 5:
+        # ---- NADA ----
+        limpar_tela()
+        print()
+        print("  A luz pisca... e some.")
+        print("  Não era nada, apenas um reflexo do luar.")
+        input("\n  Pressione ENTER para continuar...")
+
+    else:
+        # ---- ARMADILHA ----
+        limpar_tela()
+        print()
+        print("  A fada se distorce... e revela sua verdadeira forma.")
+        input("  Pressione ENTER para continuar...")
+        print("\n  Era uma armadilha de um monstro das sombras!")
+        print("  Você gasta energia para escapar antes que ele te alcance.")
+
+        # Custo escala com o nível (mínimo 10, máximo 25% da mana atual)
+        custo = min(heroi.mana, 10 + int(heroi.nivel * 0.8))
+        if custo <= 0:
+            # Sem mana: o monstro te acerta direto
+            dano = random.randint(10, 20) + int(heroi.nivel * 1.5)
+            heroi.vida = max(0, heroi.vida - dano)
+            print(f"\n  Sem mana para se defender, você é atingido: -{dano} HP.")
         else:
-            print("Opção invalida")
+            heroi.mana -= custo
+            print(f"\n  Você perdeu {custo} de MP ao escapar.")
+
+        if heroi.vida / heroi.vidamax < 0.25:
+            print(f"\n  ⚠ Vida crítica: {heroi.vida}/{heroi.vidamax}")
+
+        input("\n  Pressione ENTER para continuar...")
         
-def evento_bau(heroi): # Evento dentro do acampamento
-    print("\n[EVENTO] Você encontra um baú velho enterrado perto da sua barraca!")
-    escolha = input("Deseja abrir?\n[1] - Sim\n[2] - Não\n")
-    
-    if escolha == "1":
-        sorte = random.randint(1, 10)
-        if sorte > 4:  # 60% de chance de recompensa
-            ganho = random.randint(9, 20)
-            heroi.ouro += ganho
-            print(f"\nSucesso! Você encontrou {ganho} de ouro dentro do baú!")
-            input("\nPressione ENTER para continuar...")
-        else:          # 40% de chance de armadilha
-            dano = random.randint(5, 10)
-            heroi.vida -= dano
-            print(f"\nEra uma armadilha de agulhas! Você tomou {dano} de dano.\n")
-            input("\nPressione ENTER para continuar...")
+def evento_bau(heroi):
+    from util import limpar_tela
+
+    limpar_tela()
+    print()
+    print("  [EVENTO] Você encontra um baú velho enterrado perto da sua barraca.")
+    print("           A madeira está apodrecida, mas o cadeado ainda parece intacto.")
+    print()
+
+    escolha = input("  Deseja abrir?  [1] Sim  [2] Não  > ").strip()
+
+    if escolha == "2":
+        print("\n  Você decide não arriscar. O baú continua enterrado.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    if escolha != "1":
+        print("\n  Comando inválido.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    # Rolagem: 1-4 → armadilha (40%), 5-10 → tesouro (60%)
+    sorte = random.randint(1, 10)
+
+    if sorte >= 5:
+        # ---- TESOURO ----
+        ganho = random.randint(15, 30) + int(heroi.nivel * 3)
+        heroi.ouro += ganho
+
+        limpar_tela()
+        print()
+        print("  Você força o cadeado... e ele cede.")
+        input("  Pressione ENTER para continuar...")
+        print(f"\n  Dentro do baú, moedas antigas brilham à luz da fogueira.")
+        print(f"  Você encontrou {ganho} de ouro!")
+        input("\n  Pressione ENTER para continuar...")
+
     else:
-        print("\nVocê decide não arriscar e ignora o baú.")
-        input("Pressione ENTER para continuar...\n")
+        # ---- ARMADILHA ----
+        dano = random.randint(8, 15) + int(heroi.nivel * 1.5)
+        heroi.vida = max(0, heroi.vida - dano)
+
+        limpar_tela()
+        print()
+        print("  Você força o cadeado...")
+        input("  Pressione ENTER para continuar...")
+        print(f"\n  Agulhas enferrujadas disparam do mecanismo!")
+        print(f"  Você tomou {dano} de dano.")
+
+        if heroi.vida <= 0:
+            print("\n  O ferimento foi profundo demais...")
+            # Aqui você pode chamar o game over, se quiser:
+            # print("[GAME OVER]")
+            # sys.exit()
+        elif heroi.vida / heroi.vidamax < 0.25:
+            print(f"\n  ⚠ Vida crítica: {heroi.vida}/{heroi.vidamax}")
+
+        input("\n  Pressione ENTER para continuar...")
 
 def evento_livro(heroi):
-    print("\n[EVENTO] Escondido entre as raízes de uma árvore próxima, você acha um livro antigo.")
-    escolha = input(
-        "Deseja folhear as páginas empoeiradas?\n[1] - Sim\n[2] - Não\n")
+    from util import limpar_tela
 
-    if escolha == "1":
-        sorte = random.randint(1, 10)
-        if sorte >= 4:  # 70% de chance de benefício
-            heroi.ataque += 2
-            print("\nVocê leu técnicas antigas de combate! Seu ATAQUE aumentou permanentemente em +2.\n")
-        else:  # 30% de chance de maldição
-            dano = 12
-            heroi.vida -= dano
-            print(f"\nAo abrir o livro, uma névoa sombria emerge e atinge você! Perdeu {dano} de HP.\n")
+    limpar_tela()
+    print()
+    print("  [EVENTO] Escondido entre as raízes de uma árvore próxima,")
+    print("           você encontra um livro antigo, coberto de poeira.")
+    print("           A capa traz símbolos que você não reconhece.")
+    print()
+
+    escolha = input("  Deseja folhear as páginas?  [1] Sim  [2] Não  > ").strip()
+
+    if escolha == "2":
+        print("\n  Você devolve o livro ao esconderijo. Algumas coisas melhor não tocar.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    if escolha != "1":
+        print("\n  Comando inválido.")
+        input("  Pressione ENTER para continuar...")
+        return
+
+    # Rolagem: 1-3 → maldição (30%), 4-10 → benefício (70%)
+    sorte = random.randint(1, 10)
+
+    if sorte >= 4:
+        # ---- BENEFÍCIO ----
+        # Bônus escala com o nível, mas com teto pra não quebrar o jogo no fim
+        bonus = min(2 + int(heroi.nivel * 0.4), 15)
+        heroi.ataque += bonus
+
+        limpar_tela()
+        print()
+        print("  Você abre o livro com cuidado...")
+        input("  Pressione ENTER para continuar...")
+        print(f"\n  As páginas revelam técnicas antigas de combate,")
+        print(f"  diagramas de postura, formas de golpe que você nunca viu.")
+        print(f"  Seu ATAQUE aumentou permanentemente em +{bonus}!")
+        input("\n  Pressione ENTER para continuar...")
+
     else:
-        print("\nVocê deixa o livro quieto na natureza.")
-    input("\nPressione ENTER para continuar...")
+        # ---- MALDIÇÃO ----
+        dano = 12 + int(heroi.nivel * 1.2)
+        heroi.vida = max(0, heroi.vida - dano)
+
+        limpar_tela()
+        print()
+        print("  Você abre o livro...")
+        input("  Pressione ENTER para continuar...")
+        print(f"\n  Uma névoa sombria emerge das páginas e atinge você!")
+        print(f"  Você perdeu {dano} de HP.")
+
+        if heroi.vida <= 0:
+            print("\n  A maldição foi forte demais...")
+            # Aqui você pode chamar o game over, se quiser:
+            # print("[GAME OVER]")
+            # sys.exit()
+        elif heroi.vida / heroi.vidamax < 0.25:
+            print(f"\n  ⚠ Vida crítica: {heroi.vida}/{heroi.vidamax}")
+
+        input("\n  Pressione ENTER para continuar...")
 
 def evento_fogueira(heroi):
     print("\n[EVENTO] A noite está tranquila. O som da fogueira acalma sua mente.")
@@ -185,7 +344,7 @@ def evento_pedagio_forcado(heroi):
     print(f"\n[1] - Pagar o pedágio ({valor_pedagio} Ouro)")
     print("[2] - Recusar e LUTAR!")
 
-    escolha = input("\nQual a sua escolha? ")
+    escolha = input("\nQual a sua escolha?\n")
 
     if escolha == "1":
         if heroi.ouro >= valor_pedagio:
@@ -263,7 +422,7 @@ def evento_mercador(heroi): # AINDA N DECIDI O TANTO QUE CURA
 def evento_vila_inical(heroi): # Competição de Lenhadores Provavelmente 2* evento da vila / Se o ataque do jogador for maior que X ele ganha a disputa, ganhando ouro e XP 
     while progresso.flags_eventos["evento1_concluido"] == False:
         print("[EVENTO] Você vê que a guilda de aventureiros está reunindo caçadores para participar de uma caça a monstros elites!")
-        escolha = input("Você pode: \n[1] - Participar\n[2] - Não Participar") 
+        escolha = input("Você pode: \n[1] - Participar\n[2] - Não Participar\n") 
 
         if escolha == "1":
             progresso.avancar_jogo = False
@@ -319,7 +478,7 @@ def evento_pesca_vila(heroi):
     
     while progresso.flags_eventos["evento2_concluido"] == False:
         print("[EVENTO] Você ficou sabendo que a vila tem um local famoso de pesca por perto...")
-        escolha = input("Você pode: \n[1] - Pescar\n[2] - Não Pescar") 
+        escolha = input("Você pode: \n[1] - Pescar\n[2] - Não Pescar\n") 
         if escolha == "1":
             print("\nVocê resolveu pescar.")
             dialogo("...")
@@ -507,7 +666,7 @@ def evento_festival_da_neve(heroi):
 def evento_sombra(heroi):
 
     from mundo import zona_atual
-    print("[PERIGO][PERIGO] Um espelho quebrado chama sua atenção...[PERIGO][PERIGO]")
+    print("[PERIGO] Um espelho quebrado chama sua atenção...")
 
     escolha = input("\n[1] - Aproximar-se\n[2] - Sair\n")
 
@@ -542,16 +701,21 @@ def evento_raid_vila_destruida(heroi):
         print("Você fica para lutar...")
         input("Pressione ENTER para continuar...")
         chefe = boss_floresta[0]
+        chefe.vida += 500
+        chefe.ataque += 30 
         chefe.nome = f"{Cores.AMARELO}{chefe.nome}{Cores.RESET}"
         combatesys(heroi, chefe)        # Já inicia sistema de luta, evitando poder fugir da luta e evitando re-ligar o acampamento 
         chefe = boss_caverna[0]
+        chefe.vida += 500
+        chefe.ataque += 30 
         chefe.nome = f"{Cores.AMARELO}{chefe.nome}{Cores.RESET}"
         combatesys(heroi, chefe)
+        chefe.vida += 500
+        chefe.ataque += 30 
         chefe.nome = f"{Cores.AMARELO}{chefe.nome}{Cores.RESET}"
         chefe = boss_montanhasgeladas[0]
         combatesys(heroi, chefe)
             # Recompensa do jogador é ativada dentro da verificação do ferreiro
-        print("Parabéns você venceu a RAID!\nUm dos inimigos deixaram um material SUPER RARO, tente falar com o ferreiro!")
         progresso.item_raid_vila = True
         set_acampamento(True)
         progresso.flags_eventos["evento5_concluido"] = True

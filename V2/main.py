@@ -3,7 +3,7 @@ from heroi import Heroi
 from database import menu_principal, criar_banco
 from util import limpar_tela, Cores
 
-criar_banco()               # <- chama AQUI, antes de tudo
+criar_banco() 
 limpar_tela()
 heroi = menu_principal()
 if heroi is None:
@@ -120,32 +120,18 @@ if __name__ == "__main__":
         input("\nPressione Enter para sair...")
 
 
-# Posteriormente fazer um seletor de DIFICULDADE no V2.5 
-# Quando for fazer o EQUIPAMENTO de armaduras e espadas no inventário, fazer a remoção do valor de ataque do item no jogador e somar pelo do novo
-# Refatorando TODA a parte de itens, pois para usar pocoes, armaduras e armas no mesmo inventário, vou precisar criar uma classe somente para itens ele como modelo para outros
-# Nova ideia de teste para INVENTÁRIO, criar um só porém nele usar filtros para pesquisa de itens no comando de exibição
-# Acho que deixarei isso para o V2 
-# E deixaria o Boss Rush para uma atualização futura, talvez: Arena dos Campeões ou Modo Desafio
-# Fazer sistema em algumas batalhas opcionais o boss não te mata e só vai embora (sistema de game over que só funciona nas batalhas principais por exemplo)
-# Poder voltar em vilas antigas
 
 
-
-#                               FAZER EM CASA
-# Ir colocando o LIMPAR TELA junto com o input("Pressione ENTER para continuar...") para deixar o jogo limpo e visivel sem pular qualquer info importante
-# Fazer um ranking online de quem terminou mais forte / ou pontos acumulados e com os bosses derrotados 
-# Logica (Evento da vila -> Luta contra sombra -> Se DERROTOU: Boss final VERDADEIRO é liberado , Else: Final falso é liberado # Boss secreto da zona não existe)
-# Talvez criar mais poções uma para cada região e amuletos também
-# # Dialogo do boss final é executado durante a verificação do mundo / NAO MOSTRA BUGADO
-
-
-
-# Criado sistema de save de eventos realizados , resolvidos diversos bugs
-# Criei final verdadeiro e final (TESTAR EM CASA SE FUNCIONOU)
-
-# Criado todos os eventos de vila, falta apenas testar (TESTAR EM CASA SE FUNCIONOU)
-# USAR POÇÃO agora é com enumerate (TESTAR EM CASA SE FUNCIONOU)
-# Acho que com o IF na opção de TELAS, onde ele verifica a ultima vila ele provavelmente deve barra o jogador de acessar a vila (TESTAR EM CASA SE FUNCIONOU)
-# TESTE DE VENENO na habilidade do boss especial aranha, e 2 habilidades em 1 boss (TESTAR EM CASA SE FUNCIONOU)
-# TESTAR habilidade do boss de gelo    efeito STUN no combate  (TESTAR EM CASA SE FUNCIONOU)
-# Testar contador de stun da HUD (TESTAR EM CASA SE FUNCIONOU)
+# Resolvido vários bugs e qualidade de vida
+# Adicionado usar poção no inventário
+# Adicionado novo item loja do mago para aumento de limite de MP
+# Balanceamento de ouro e XP ganhos de bosses 
+# Balanceamento de preço ferreiro e itens
+# Balanceado inimigos e curva de dificuldade
+# Corrigido final verdadeiro não iniciava
+# Atributo bosses fixos para forçar jogador estabelecer uma estrategia até chegar no boss
+# Novos dialogos adicionados em certos bosses
+# Nova Habilidade para certo boss
+# Resolvido final verdadeiro não barrar a visita de vila
+# Eventos de dano e cura buffados
+# Eventos com novos prompts e novas interações

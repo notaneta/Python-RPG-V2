@@ -141,8 +141,10 @@ def menumundo(heroi):
         opcao = hud_mundo(heroi)
 
         if opcao == "1" and heroi.zona_atual == zona5_abismo:
-            print("Deu bom!")
+            heroi.zona_atual.progresso = 5
+            print("A luta final irá começar, esteja preparado!")
             input("Pressione ENTER para continuar...")
+            heroi.zona_atual.chamarboss(heroi)
 
         if opcao == "1":
             if heroi.zona_atual.bossderrotado == False:
@@ -196,6 +198,13 @@ def menumundo(heroi):
                             input("\nPressione ENTER para continuar...")
 
                             sys.exit()
+
+                        if heroi.zona_atual == zona4_castelo_do_caos and progresso.final_verdadeiro:
+                            heroi.zona_atual = heroi.zona_atual.proximo_cenario
+                            heroi.vila_atual.nome = "Vila Indisponível" 
+                            print(f"Você viajou para {heroi.zona_atual.nome}!")
+                            input("Pressione ENTER para continuar...")
+                            return
 
                         if heroi.zona_atual == zona4_castelo_do_caos:
                             if not progresso.final_verdadeiro:

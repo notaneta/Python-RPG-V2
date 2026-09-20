@@ -48,10 +48,10 @@ def usarfoco(heroi, inimigo):
                 print(f"Foco insuficiente. Você tem {int(heroi.foco)}, precisa de {habilidade.custo}.")
                 input("Pressione ENTER para continuar...")
                 return False
-
-    print("ID da habilidade inválida")
-    input("Pressione ENTER para continuar...")
-    return False
+        else:
+            print("ID da habilidade inválida")
+            input("Pressione ENTER para continuar...")
+            return False
 
 listahabilidades = [
     # Id, Nome, Dano, Custo Foco, Nível

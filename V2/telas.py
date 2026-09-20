@@ -21,7 +21,7 @@ def menujogo(heroi):
         print("  " + "─" * 44)
         print(f"  [1]  {heroi.vila_atual.nome}")
         print("  [2]  Seguir em frente")
-        print("  [3]  Exibir Status          (restaura HP/MP)")
+        print("  [3]  Status / Inventário")
         print("  [4]  Salvar jogo")
         print("  [5]  Carregar Jogo")
         print("  [9]  Sair do Jogo")
@@ -32,9 +32,9 @@ def menujogo(heroi):
 
 
         if escolha == "1":
-
-            if heroi.vila_atual == vila5_finalverdadeiro:
-                print("Você só tem escolha a não ser avançar...")
+            from mundo import zona5_abismo
+            if heroi.zona_atual == zona5_abismo:
+                print("Você só tem a escolha de avançar...")
                 input("Pressione ENTER para continuar...")
 
             else:
@@ -44,9 +44,30 @@ def menujogo(heroi):
             menumundo(heroi)
 
         elif escolha == "3":
-            limpar_tela()
-            heroi.mostrar_status()
-            input("Pressione ENTER para continuar...")
+                while True:
+                    escolha2 = input("\n1 - Status Heroi\n2 - Inventário poções\n3 - Magias Aprendidas\n4 - Habilidades Aprendidas\n0 - Voltar\n")
+                    if escolha2 == "1":
+                        heroi.mostrar_status()
+                        input("\nPressione ENTER para continuar...")
+                        break
+
+                    elif escolha2 == "2":
+                        heroi.mostrar_inventario_pocoes()
+                        input("\nPressione ENTER para continuar...")
+                        break
+
+                    elif escolha2 == "3":
+                        heroi.mostrarmagias()
+                        input("\nPressione ENTER para continuar...")
+                        break
+
+                    elif escolha2 == "4":
+                        heroi.mostrarSkill()
+                        input("\nPressione ENTER para continuar...")
+                        break
+
+                    elif escolha2 == "0":
+                        break
 
         elif escolha == "4":
             print("Jogo salvo!")

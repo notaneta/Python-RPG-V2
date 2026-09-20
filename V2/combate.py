@@ -116,7 +116,17 @@ def combatesys(heroi, inimigo):
                     
                 else:
                     print("\nSeu HP foi reduzido a 0, Você perdeu...\n[GAME OVER]\n")
-                    sys.exit()
+
+                    while True:
+                        escolha3 = input("Continuar? (s/n)")
+                        if escolha3 == "s":
+                            from database import menu_principal 
+                            menu_principal()
+                        elif escolha3 == "n":
+                            sys.exit()
+
+                        else:
+                            print("Comando invalido")
 
             # Logica vecer batalha 
 

@@ -43,10 +43,10 @@ def usarmagia(heroi, inimigo):
                 print("Você não tem MP suficiente.")
                 input("Pressione ENTER para continuar...")
                 return False
-
-    print("ID da Magia inválida")
-    input("Pressione ENTER para continuar...")
-    return False
+        else:
+            print("ID da Magia inválida")
+            input("Pressione ENTER para continuar...")
+            return False
 
 listamagias = [
     # Nome, Dano, Custo MP, Nível Requisito
