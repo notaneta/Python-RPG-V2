@@ -39,9 +39,9 @@ class Personagem:
         from magias import listamagias
         while self.xp >= self.xplevel:
             self.vidamax = int(self.vidamax * 1.06)
-            self.vida = min(self.vidamax, self.vida + self.vidamax * 0.50)      # Recupera vida 40% ao subir de level
+            self.vida = min(self.vidamax, self.vida + self.vidamax * 0.40)      # Recupera vida 40% ao subir de level
             self.manamax = int(self.manamax * 1.10)
-            self.mana += min(self.manamax, self.mana + self.manamax * 0.50)      # Recupera mana 40% ao subir de level
+            self.mana = min(self.manamax, self.mana + self.manamax * 0.40)      # Recupera mana 40% ao subir de level
             self.ataque = int(self.ataque * 1.07)
             self.defesa += 1
             self.xp -= self.xplevel
