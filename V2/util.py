@@ -1,6 +1,10 @@
 import os
 import shutil
 
+def calcular_dano(dano_bruto, resistencia=0):
+    resistencia = max(0, min(1, resistencia))               # Resistência fica sempre entre 0% e 100%
+    return max(1, round(dano_bruto * (1 - resistencia)))    # Sempre inteiro, mínimo 1
+
 class Cores:
     CIANO    = "\033[96m"
     AMARELO  = "\033[93m"
@@ -13,6 +17,17 @@ class Cores:
 def limpar_tela():
     os.system("cls" if os.name == "nt" else "clear")
     print("\033[H\033[J", end="")
+
+def reiniciar_jogo():   # Abre o jogo de novo do zero e fecha o atual / Usado no Game Over, assim nada da partida que morreu fica na memória
+    import sys, subprocess
+    if getattr(sys, "frozen", False):       # Rodando como .exe
+        comando = [sys.executable]
+    else:                                   # Rodando como python main.py
+        comando = [sys.executable, os.path.abspath(sys.argv[0])]
+
+    ambiente = dict(os.environ)
+    ambiente["PYINSTALLER_RESET_ENVIRONMENT"] = "1"     # Sem isso o .exe do PyInstaller pode se perder ao abrir ele mesmo
+    sys.exit(subprocess.call(comando, env=ambiente))
 
 # Descobrir e alinha HUD
 largura = shutil.get_terminal_size().columns

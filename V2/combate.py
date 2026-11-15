@@ -4,6 +4,8 @@ from util import limpar_tela, barra_hp, barra_mp, barra_furia, largura, acampame
 from itens import usaritem
 from magias import usarmagia, listamagias
 from habilidades import usarfoco , listahabilidades
+levantou_defesa = False
+usou_habilidade = False
 
 def combateini(heroi, inimigo):   # Heroi e inimigo dentro do parenteses, recebem os dados que foram enviados em ordem no parenteses do main
 
@@ -33,6 +35,7 @@ def combatehud(heroi, inimigo):
     print(f"MP [{barra_mp(heroi.mana, heroi.manamax)}] "f"{int(heroi.mana)}/{heroi.manamax}")
     print(f"Fúria [{barra_furia(heroi.foco, heroi.focomax)}] "f"{int(heroi.foco)}/{heroi.focomax}")
     print(f"Ataque: {heroi.ataque}       Defesa: {heroi.defesa}")
+    print(inimigo.texto_resistencias())
     print("=" * largura)
     print(f"{inimigo.nome}")
     print(f"HP [{barra_hp(inimigo.vida, inimigo.vidamax)}] "f"{int(inimigo.vida)}/{inimigo.vidamax}")
@@ -52,38 +55,42 @@ def combatesys(heroi, inimigo):
         while heroi.vida > 0 and inimigo.vida > 0:
             limpar_tela()
             combatehud(heroi, inimigo)
-            lutar = input("\n[1] - Atacar\n[2] - Lançar Magia\n[3] - Usar Item (Não passa o turno)\n[4] - Usar Habilidade\n")
-            print("\nQual sua decisão?\n")
             turnojogador = False
 
-            # Teste Stun
-
-            if heroi.turnos_stun >= 1:
-                print("Você ficou paralisado e não conseguiu agir nesse turno!")
+            if heroi.turnos_stun >= 1:      # Paralisado: o menu nem aparece
+                print("\nVocê está paralisado e não consegue agir nesse turno!")
                 input("\nPressione ENTER para continuar...")
                 heroi.turnos_stun -= 1
-                turnojogador = True
+                turnojogador = True         # O turno passa e o inimigo ataca
 
             else:   # Sistema padrão escolhas jogador
+                print("\nQual sua decisão?")
+                lutar = input("\n[1] - Atacar\n[2] - Defender\n[3] - Lançar Magia\n[4] - Usar Item (Não passa o turno)\n[5] - Usar Habilidade\n")
 
-                if lutar == '1':       
+                if lutar == '1':
                     turnojogador = True
                     heroi.atacar(inimigo)
-                    heroi.turnos_stun -= 1
 
                 elif lutar == "2":
+                    turnojogador = True
+                    global levantou_defesa
+                    levantou_defesa = True
+
+                elif lutar == "3":
                     if heroi.mana >= 18:
                         turnojogador = usarmagia(heroi, inimigo)
                     else:
                         print("\nVocê precisa de pelo menos 25 de mana!")
                         input("\nPressione ENTER para continuar...")
 
-                elif lutar == '3':
+                elif lutar == '4':
                     usaritem(heroi)
 
-                elif lutar == "4":
+                elif lutar == "5":
                     if heroi.foco >= 25:
+                        global usou_habilidade
                         turnojogador = usarfoco(heroi, inimigo)
+                        usou_habilidade = True
 
                     else:
                         print("\nVocê precisa de pelo menos 25 de fúria!")
@@ -95,6 +102,9 @@ def combatesys(heroi, inimigo):
                     for habilidade in inimigo.habilidade:
                         habilidade(heroi, inimigo)      # Habilidade só é executada caso a vida do boss esteja no nivel correto conforme ele mesmo dispor
 
+                levantou_defesa = False
+                usou_habilidade = False
+                
         # Logica Game over
 
         else:
@@ -120,8 +130,8 @@ def combatesys(heroi, inimigo):
                     while True:
                         escolha3 = input("Continuar? (s/n)")
                         if escolha3 == "s":
-                            from database import menu_principal 
-                            menu_principal()
+                            from util import reiniciar_jogo
+                            reiniciar_jogo()        # Volta para a tela inicial (Novo Jogo / Carregar) com o jogo zerado
                         elif escolha3 == "n":
                             sys.exit()
 

@@ -116,7 +116,7 @@ class Personagem:
             return
         for i, magia in enumerate(self.magiasaprendidas, start=1):
             print(
-                f"{i} - {magia.nome:<18} | Dano: {magia.dano:<2} | MP {magia.custo}")
+                f"{i} - {magia.nome:<18} | Dano: {int(magia.dano + self.manamax * 0.3):<2} | MP {magia.custo}")
 
         print("==========================================")
 
@@ -133,12 +133,13 @@ class Personagem:
             return
         for i, skill in enumerate(self.habilidadesaprendidas, start=1):
             print(
-                f"{i} - {skill.nome:<18} | Dano: {skill.dano:<2} | Fúria: {skill.custo}")
+                f"{i} - {skill.nome:<18} | Dano Final: {int(skill.dano * self.ataque):<2} | Fúria: {skill.custo}")
 
         print("==========================================")
 
     def atacar(self, inimigo):
-        ataquefinal = max(1, self.ataque - inimigo.defesa)
+        from util import calcular_dano
+        ataquefinal = calcular_dano(self.ataque, inimigo.defesa)
         inimigo.vida -= ataquefinal
         print(f"\nVoce ataca o {inimigo.nome} com sua espada e causa {ataquefinal} de dano.")
         input("\nPressione ENTER para continuar...")

@@ -11,7 +11,6 @@ if heroi is None:
 
 LARGURA = 54
 
-
 def _cabecalho(titulo):
     print(f"{Cores.CIANO}╔" + "═" * LARGURA + f"╗{Cores.RESET}")
     print(f"{Cores.CIANO}║{Cores.RESET}" + f"{titulo.center(LARGURA)}" + f"{Cores.CIANO}║{Cores.RESET}")
@@ -49,6 +48,10 @@ def mostrar_tutorial(heroi):
     limpar_tela()
     _cabecalho("SISTEMA DE COMBATE")
     print()
+    print(f"  {Cores.VERDE}•{Cores.RESET} NOVA Mecânica, DEFENDER, o ataque do inimigo é diminuido pela metade.")
+    print(f"  {Cores.VERDE}•{Cores.RESET} NOVA Mecânica, DANO da Habilidade é proporcional ao ataque base do Heroí.")
+    print(f"  {Cores.VERDE}•{Cores.RESET} NOVA Mecânica, DANO da Mágia é escalado conforme sua mana MAX total.")
+    print(f"  {Cores.VERDE}•{Cores.RESET} NOVA Mecânica, Fúria não é gerada no turno que usou uma Habilidade.")
     print(f"  {Cores.VERDE}•{Cores.RESET} Derrote {Cores.AMARELO}5 inimigos{Cores.RESET} para liberar a batalha contra o chefe da área.")
     print(f"  {Cores.VERDE}•{Cores.RESET} Derrotar o chefe permite que você progrida para a próxima área.")
     print(f"  {Cores.VERDE}•{Cores.RESET} Chefes possuem habilidades especiais que podem mudar o rumo da batalha.")
@@ -120,18 +123,14 @@ if __name__ == "__main__":
         input("\nPressione Enter para sair...")
 
 
-
-
-# Resolvido vários bugs e qualidade de vida
-# Adicionado usar poção no inventário
-# Adicionado novo item loja do mago para aumento de limite de MP
-# Balanceamento de ouro e XP ganhos de bosses 
-# Balanceamento de preço ferreiro e itens
-# Balanceado inimigos e curva de dificuldade
-# Corrigido final verdadeiro não iniciava
-# Atributo bosses fixos para forçar jogador estabelecer uma estrategia até chegar no boss
-# Novos dialogos adicionados em certos bosses
-# Nova Habilidade para certo boss
-# Resolvido final verdadeiro não barrar a visita de vila
-# Eventos de dano e cura buffados
-# Eventos com novos prompts e novas interações
+# Adicionado opção DEFENDER
+# Adicionado nova Mecânica HABILIDADE usa ATAQUE BASE como dano proporcional!
+# Adicionado nova Mecânica DANO mágia escala com TOTAL DE MP máximo
+# Adicionado HUD mostra dano dano real da skill e magia
+# Atualizado regras, novas mecânicas informadas no tutorial
+# Depois de usar uma Habilidade o heroi não gera mais fúria no turno
+# Adicionado Balanceamento de inimigos, funciona como % de defesa e defesa de magia
+# Adicionado Balanceamento de Defesa e defesa mágica para Héroi
+# Adicionado HUD do heroi com % de defesa
+# Adicionado HUD com inimigo de % defesa e defesa mágica 
+# Corrigido diversos bugs encontrados

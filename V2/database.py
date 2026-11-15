@@ -4,6 +4,10 @@ from heroi import Heroi
 import progresso
 import vilas
 from caminhos import CAMINHO_BANCO
+from util import limpar_tela
+
+TOTAL_SLOTS = 3     # Quantidade de saves que o jogo aceita
+slot_atual = 1      # Slot que está sendo jogado agora / Cada slot é o id do heroi dentro do banco (1, 2 ou 3)
 
 
 # Tabela do herói   /   Caso adicionar mais coisas tenho que apagar o banco de dados anterior 
@@ -100,7 +104,7 @@ def salvar_heroi(heroi):
     cursor = conexao.cursor()
 
     # --- 1) Salva os atributos do herói (INSERT ou UPDATE) ---
-    cursor.execute("SELECT id FROM heroi WHERE id = ?", (1,))
+    cursor.execute("SELECT id FROM heroi WHERE id = ?", (slot_atual,))
     save = cursor.fetchone()
 
     if save is None:
@@ -111,7 +115,7 @@ def salvar_heroi(heroi):
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-                    1,
+                    slot_atual,
                     heroi.nome,
                     heroi.nivel,
                     heroi.vida,
@@ -150,32 +154,32 @@ def salvar_heroi(heroi):
                     heroi.focogen,
                     getattr(heroi.vila_atual, "nome", None),
                     getattr(heroi.zona_atual, "nome", None),
-                    1
+                    slot_atual
         ))
 
     # --- 2) Salva o inventário (limpa e recria — mais simples que comparar) ---
-    cursor.execute("DELETE FROM inventario WHERE heroi_id = ?", (1,))
+    cursor.execute("DELETE FROM inventario WHERE heroi_id = ?", (slot_atual,))
     for item in heroi.inventario:
         cursor.execute("""
             INSERT INTO inventario (heroi_id, nome, quantidade)
             VALUES (?, ?, ?)
-        """, (1, item.nome, item.quantidade))
+        """, (slot_atual, item.nome, item.quantidade))
 
     # --- 3) Salva as magias ---
-    cursor.execute("DELETE FROM magias_heroi WHERE heroi_id = ?", (1,))
+    cursor.execute("DELETE FROM magias_heroi WHERE heroi_id = ?", (slot_atual,))
     for magia in heroi.magiasaprendidas:
         cursor.execute("""
             INSERT INTO magias_heroi (heroi_id, nome)
             VALUES (?, ?)
-        """, (1, magia.nome))
+        """, (slot_atual, magia.nome))
 
     # --- 4) Salva as habilidades ---
-    cursor.execute("DELETE FROM habilidades_heroi WHERE heroi_id = ?", (1,))
+    cursor.execute("DELETE FROM habilidades_heroi WHERE heroi_id = ?", (slot_atual,))
     for skill in heroi.habilidadesaprendidas:
         cursor.execute("""
             INSERT INTO habilidades_heroi (heroi_id, nome)
             VALUES (?, ?)
-        """, (1, skill.nome))
+        """, (slot_atual, skill.nome))
         
     # --- 5) Salva o progresso da zona ---
     zona = heroi.zona_atual
@@ -195,20 +199,20 @@ def salvar_heroi(heroi):
         int(progresso.final_verdadeiro),
         int(progresso.item_raid_vila),
         int(progresso.dialogo2_boss),
-        1,
+        slot_atual,
     ))
 
 # --- 6) Salva as flags de eventos ---
-    cursor.execute("DELETE FROM eventos_heroi WHERE heroi_id = ?", (1,))
+    cursor.execute("DELETE FROM eventos_heroi WHERE heroi_id = ?", (slot_atual,))
     for nome, valor in progresso.flags_eventos.items():
         cursor.execute("""
             INSERT INTO eventos_heroi (heroi_id, nome_evento, concluido)
             VALUES (?, ?, ?)
-        """, (1, nome, int(valor)))
+        """, (slot_atual, nome, int(valor)))
 
 
     # Ferreiro
-    cursor.execute("DELETE FROM ferreiro WHERE heroi_id = ?", (1,))
+    cursor.execute("DELETE FROM ferreiro WHERE heroi_id = ?", (slot_atual,))
     todos_amuletos = (
         vilas.ferreiro_Amuletos_Ataque
         + vilas.ferreiro_Amuletos_Defesa
@@ -221,7 +225,7 @@ def salvar_heroi(heroi):
         cursor.execute("""
             INSERT INTO ferreiro (heroi_id, nome)
             VALUES (?, ?)
-        """, (1, item.nome))
+        """, (slot_atual, item.nome))
 
     conexao.commit()
     conexao.close()
@@ -235,7 +239,7 @@ def carregar_heroi():
            vila_atual, zona_atual
     FROM heroi
     WHERE id = ?
-""", (1,))
+""", (slot_atual,))
     dados = cursor.fetchone()
 
     if dados is None:
@@ -284,7 +288,7 @@ def carregar_heroi():
             mapa_zonas.get(nome_zona, mundo.zona1_floresta))
     # --- 3) Restaura o inventário ---
     heroi.inventario = []                     # ← limpa antes
-    cursor.execute("SELECT nome, quantidade FROM inventario WHERE heroi_id = ?", (1,))
+    cursor.execute("SELECT nome, quantidade FROM inventario WHERE heroi_id = ?", (slot_atual,))
     from itens import poçoes
     for nome_item, qtd in cursor.fetchall():
         for pocao in poçoes:
@@ -296,7 +300,7 @@ def carregar_heroi():
 
     # --- 4) Restaura as magias ---
     heroi.magiasaprendidas = []               # ← limpa antes
-    cursor.execute("SELECT nome FROM magias_heroi WHERE heroi_id = ?", (1,))
+    cursor.execute("SELECT nome FROM magias_heroi WHERE heroi_id = ?", (slot_atual,))
     from magias import listamagias
     for (nome_magia,) in cursor.fetchall():
         for magia in listamagias:
@@ -307,7 +311,7 @@ def carregar_heroi():
     # --- 5) Restaura as habilidades ---
     heroi.habilidadesaprendidas = []          # ← limpa o que o __init__ pôs
 
-    cursor.execute("SELECT nome FROM habilidades_heroi WHERE heroi_id = ?", (1,))
+    cursor.execute("SELECT nome FROM habilidades_heroi WHERE heroi_id = ?", (slot_atual,))
     from habilidades import listahabilidades
     for (nome_skill,) in cursor.fetchall():
         for skill in listahabilidades:
@@ -321,7 +325,7 @@ def carregar_heroi():
             final_verdadeiro, item_raid_vila, dialogo2_boss
         FROM heroi
         WHERE id = ?
-    """, (1,))
+    """, (slot_atual,))
     prog = cursor.fetchone()
 
     if prog and heroi.zona_atual:
@@ -335,14 +339,14 @@ def carregar_heroi():
     # --- 6) Restaura as flags de eventos ---
     cursor.execute("""
         SELECT nome_evento, concluido FROM eventos_heroi WHERE heroi_id = ?
-    """, (1,))
+    """, (slot_atual,))
     for nome, valor in cursor.fetchall():
         if nome in progresso.flags_eventos:
             progresso.flags_eventos[nome] = bool(valor)
 
 
     # Ferreiro
-    cursor.execute("SELECT nome FROM ferreiro WHERE heroi_id = ?", (1,))
+    cursor.execute("SELECT nome FROM ferreiro WHERE heroi_id = ?", (slot_atual,))
     nomes_salvos = [linha[0] for linha in cursor.fetchall()]
 
     vilas.ferreiro_Amuletos_Ataque[:] = [i for i in vilas.ferreiro_Amuletos_Ataque if i.nome in nomes_salvos]
@@ -361,39 +365,95 @@ def carregar_heroi():
     conexao.close()
     return heroi
 
-def deletar_save():
+def buscar_slot(slot):      # Devolve (nome, nivel, zona) do save que está no slot, ou None se o slot estiver vazio
+    conexao = sqlite3.connect(CAMINHO_BANCO)
+    cursor = conexao.cursor()
+    cursor.execute("SELECT nome, nivel, zona_atual FROM heroi WHERE id = ?", (slot,))
+    save = cursor.fetchone()
+    conexao.close()
+    return save
+
+def mostrar_slots():
+    print("=" * 54)
+    print("SAVES".center(54))
+    print("=" * 54)
+    for slot in range(1, TOTAL_SLOTS + 1):
+        save = buscar_slot(slot)
+        if save is None:
+            print(f"Slot {slot} - Vazio")
+        else:
+            nome, nivel, zona = save
+            print(f"Slot {slot} - {nome} | Nível {nivel} | {zona}")
+    print("=" * 54)
+
+def escolher_slot(pergunta):    # Devolve o número do slot escolhido, ou 0 se o jogador quiser voltar
+    while True:
+        escolha = input(f"\n{pergunta} (1 a {TOTAL_SLOTS}, ou 0 para voltar)\n")
+        if escolha.isdigit() and 0 <= int(escolha) <= TOTAL_SLOTS:
+            return int(escolha)
+        print("Slot inválido!")
+
+def deletar_save(slot):
     with sqlite3.connect(CAMINHO_BANCO) as conexao:
         cursor = conexao.cursor()
-        cursor.execute("DELETE FROM inventario WHERE heroi_id = ?", (1,))
-        cursor.execute("DELETE FROM magias_heroi WHERE heroi_id = ?", (1,))
-        cursor.execute("DELETE FROM habilidades_heroi WHERE heroi_id = ?", (1,))
-        cursor.execute("DELETE FROM eventos_heroi WHERE heroi_id = ?", (1,))
-        cursor.execute("DELETE FROM heroi WHERE id = ?", (1,))
+        cursor.execute("DELETE FROM inventario WHERE heroi_id = ?", (slot,))
+        cursor.execute("DELETE FROM magias_heroi WHERE heroi_id = ?", (slot,))
+        cursor.execute("DELETE FROM habilidades_heroi WHERE heroi_id = ?", (slot,))
+        cursor.execute("DELETE FROM eventos_heroi WHERE heroi_id = ?", (slot,))
+        cursor.execute("DELETE FROM ferreiro WHERE heroi_id = ?", (slot,))      # Faltava apagar o ferreiro, o save novo herdava a loja do antigo
+        cursor.execute("DELETE FROM heroi WHERE id = ?", (slot,))
 
 def menu_deletar():
-    confirmar = input("Tem certeza? Isso apaga TUDO! (s/n): ")
+    slot = escolher_slot("Qual slot deseja apagar?")
+    if slot == 0:
+        return
+
+    if buscar_slot(slot) is None:
+        print("Esse slot já está vazio.")
+        input("Pressione ENTER para continuar...")
+        return
+
+    confirmar = input(f"Tem certeza? Isso apaga TUDO do slot {slot}! (s/n): ")
     if confirmar.lower() == "s":
-        deletar_save()
+        deletar_save(slot)
         print("Save apagado com sucesso!")
     else:
         print("Cancelado.")
     input("Pressione ENTER para continuar...")
 
 def menu_principal():
-    conexao = sqlite3.connect(CAMINHO_BANCO)
-    cursor = conexao.cursor()
-    cursor.execute("SELECT id FROM heroi WHERE id = ?", (1,))
-    save = cursor.fetchone()
-    conexao.close()
-
-    if save is None:
-        return None
+    global slot_atual
 
     while True:
-        escolha = input("Digite:\n[1] - Novo Jogo\n[2] - Carregar Jogo\n[3] - Deletar Save Existente\n")
+        limpar_tela()
+        mostrar_slots()
+        escolha = input("\nDigite:\n[1] - Novo Jogo\n[2] - Carregar Jogo\n[3] - Deletar Save Existente\n")
+
         if escolha == "1":
-            return None
+            slot = escolher_slot("Em qual slot deseja começar o novo jogo?")
+            if slot == 0:
+                continue
+
+            if buscar_slot(slot) is not None:       # Slot ocupado, só começa por cima se o jogador confirmar
+                confirmar = input(f"O slot {slot} já tem um save. Deseja apagar ele e começar de novo? (s/n): ")
+                if confirmar.lower() != "s":
+                    continue
+                deletar_save(slot)
+
+            slot_atual = slot
+            return None     # None = novo jogo, o main cria o heroi
+
         elif escolha == "2":
+            slot = escolher_slot("Qual slot deseja carregar?")
+            if slot == 0:
+                continue
+
+            if buscar_slot(slot) is None:
+                print("Esse slot está vazio.")
+                input("Pressione ENTER para continuar...")
+                continue
+
+            slot_atual = slot
             heroi = carregar_heroi()
             if heroi:
                 heroi.mostrar_status()
@@ -403,11 +463,11 @@ def menu_principal():
                 return heroi
             else:
                 print("Erro ao carregar. Voltando ao menu...")
-                continue
+                input("Pressione ENTER para continuar...")
+
         elif escolha == "3":
             menu_deletar()
-            # depois de deletar, reinicia o menu (o save pode ter sumido)
-            return menu_principal()   # recursão simples
+
         else:
             print("Opção inválida! Escolha 1, 2 ou 3.")
-    
+            input("Pressione ENTER para continuar...")

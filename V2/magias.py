@@ -1,3 +1,5 @@
+from util import calcular_dano
+
 class magias:
     def __init__(self,id, nome, dano, custo, requisito):
         self.id = id
@@ -6,8 +8,8 @@ class magias:
         self.custo = custo
         self.requisito = requisito
 
-    def mostrarmagias(self):
-        print(f"Dano: {self.dano}")
+    def mostrarmagias(self, heroi):
+        print(f"Dano: {int(self.dano + heroi.manamax * 0.3)}")
         print(f"Custo MP: {self.custo}")
 
 def usarmagia(heroi, inimigo):
@@ -18,35 +20,39 @@ def usarmagia(heroi, inimigo):
 
     heroi.mostrarmagias()
 
-    try:
-        escolha = input("Digite o N* da magia que deseja usar, ou 0 para não fazer nada\n")
-    except ValueError:
-        print("Digite um número válido.")
-        input("Pressione ENTER para continuar...")
-        return False
+    escolha = input("Digite o N* da magia que deseja usar, ou 0 para não fazer nada\n").strip()
 
-    if escolha == 0:
+    if escolha == "0":
         print("Você não faz nada...")
         input("Pressione ENTER para continuar...")
         return False
 
-    for magia in heroi.magiasaprendidas:
-        if magia.id == escolha:
-            if heroi.mana >= magia.custo:
-                heroi.mana -= magia.custo
-                ataquefinal = max(1, magia.dano - inimigo.defesa_magica)
-                inimigo.vida -= ataquefinal
-                print(f"Você causou {ataquefinal} de dano em {inimigo.nome}")
-                input("Pressione ENTER para continuar...")
-                return True
-            else:
-                print("Você não tem MP suficiente.")
-                input("Pressione ENTER para continuar...")
-                return False
-        else:
-            print("ID da Magia inválida")
-            input("Pressione ENTER para continuar...")
-            return False
+    if not escolha.isdigit():
+        print("Digite um número válido.")
+        input("Pressione ENTER para continuar...")
+        return False
+
+    indice = int(escolha) - 1
+
+    if not (0 <= indice < len(heroi.magiasaprendidas)):
+        print("ID da Magia inválida")
+        input("Pressione ENTER para continuar...")
+        return False
+
+    magia = heroi.magiasaprendidas[indice]
+
+    if heroi.mana < magia.custo:
+        print("Você não tem MP suficiente.")
+        input("Pressione ENTER para continuar...")
+        return False
+
+    heroi.mana -= magia.custo
+    danobruto = magia.dano + heroi.manamax * 0.3
+    ataquefinal = calcular_dano(danobruto, inimigo.defesa_magica)      #magia é reduzida pela resistência mágica
+    inimigo.vida -= ataquefinal
+    print(f"Você causou {ataquefinal} de dano em {inimigo.nome}")
+    input("Pressione ENTER para continuar...")
+    return True
 
 listamagias = [
     # Nome, Dano, Custo MP, Nível Requisito

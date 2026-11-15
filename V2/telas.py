@@ -75,9 +75,13 @@ def menujogo(heroi):
             input("Pressione ENTER para continuar...")
 
         elif escolha == "5":        
-            heroi = carregar_heroi()
-            heroi.mostrar_status()
-            print("Jogo carregado!")
+            salvo = carregar_heroi()
+            if salvo is None:       # Jogo novo que ainda não foi salvo nenhuma vez
+                print("Esse slot ainda não tem nenhum save.")
+            else:
+                heroi = salvo
+                heroi.mostrar_status()
+                print("Jogo carregado!")
             input("Pressione ENTER para continuar...")
 
         elif escolha == "9":
